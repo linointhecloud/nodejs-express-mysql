@@ -29,10 +29,7 @@ db.sequelize = sequelize;
 db.places = require("./place.model.js")(sequelize, Sequelize);
 db.photos = require("./photo.model.js")(sequelize, Sequelize);
 
-db.places.hasMany(db.photos, {as: "photos"})
-db.photos.belongsTo(db.places, {
-  foreignKey: "placeId",
-  as: "place"
-})
+db.places.hasMany(db.photos,{foreignKey: 'fk_placeid', sourceKey: 'id'})
+db.photos.belongsTo(db.places,{foreignKey: 'fk_placeid', targetKey: 'id'})
 
 module.exports = db;
