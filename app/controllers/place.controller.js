@@ -3,6 +3,34 @@ const Place = db.places;
 const Photo = db.photos;
 const Op = db.Sequelize.Op;
 
+// Init data: Places & Photo
+exports.init = (req, res) => {	
+	
+	// Place
+	Place.create({ 
+		name: 'Place #1', 
+		description: 'Description on Place #1', 
+    longitude: "-12.082877831178896",
+		latitude: "-77.08259557680066",
+		photos: [
+			// IPhone 7 
+			{
+				name: "Photo #1 of Place #1",
+				url: "https://picsum.photos/400/300"
+			},
+			// IPadPro
+			{
+				name: "Photo #2 of Place #2",
+				url: "https://picsum.photos/400/300"
+			}
+		]
+	}, {
+		include: [ Photo ]
+	}).then(() => {
+		res.send("Done!");
+	})
+};
+
 // Create and Save a new Place
 exports.create = (req, res) => {
   // Validate request
@@ -49,6 +77,25 @@ exports.findAll = (req, res) => {
           err.message || "Some error occurred while retrieving places."
       });
     });
+};
+
+exports.findAll = (req, res) => {
+  const name = req.query.name;
+  var condition = name ? { name: { [Op.like]: `%${name}%` } } : null;
+
+	Place.findAll({
+		attributes: ['name', 'description', 'longitude', 'latitude'],
+    where: condition,
+		include: [{
+			model: Photo,
+			where: { 
+        fk_placeid: db.Sequelize.col('place.id')
+      },
+			attributes: ['name', 'url']
+		}]
+	}).then(places => {
+	   res.send(places);
+	});
 };
 
 // Find a single place with an id
