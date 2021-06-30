@@ -1,115 +1,134 @@
-const Place = require("../models/place.model.js");
+const db = require("../models");
+const Place = db.places;
+const Photo = db.photos;
+const Op = db.Sequelize.Op;
 
 // Create and Save a new Place
 exports.create = (req, res) => {
   // Validate request
-  if (!req.body) {
+  if (!req.body.name) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
+    return;
   }
 
   // Create a Place
-  const place = new Place({
+  const place = {
     name: req.body.name,
     description: req.body.description,
     longitude: req.body.longitude,
     latitude: req.body.latitude
-  });
+  };
 
-  // Save a Place in the database
-  Place.create(place, (err, data) => {
-    if (err)
+  // Save Place in the database
+  Place.create(place)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
       res.status(500).send({
         message:
           err.message || "Some error occurred while creating the Place."
       });
-    else res.send(data);
-  });
+    });
 };
 
 // Retrieve all Places from the database.
 exports.findAll = (req, res) => {
-  Place.getAll((err, data) => {
-    if (err)
+  const name = req.query.name;
+  var condition = name ? { name: { [Op.like]: `%${name}%` } } : null;
+
+  Place.findAll({ where: condition })
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
       res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving places."
       });
-    else res.send(data);
-  });
-};
-
-// Find a single Place with a placeId
-exports.findOne = (req, res) => {
-  Place.findById(req.params.placeId, (err, data) => {
-    if (err) {
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found Place with id ${req.params.placeId}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving Place with id " + req.params.placeId
-        });
-      }
-    } else res.send(data);
-  });
-};
-
-// Update a Place identified by the placeId in the request
-exports.update = (req, res) => {
-  // Validate Request
-  if (!req.body) {
-    res.status(400).send({
-      message: "Content can not be empty!"
     });
-  }
-
-  Place.updateById(
-    req.params.placeId,
-    new Place(req.body),
-    (err, data) => {
-      if (err) {
-        if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found Placd with id ${req.params.placeId}.`
-          });
-        } else {
-          res.status(500).send({
-            message: "Error updating Placd with id " + req.params.placeId
-          });
-        }
-      } else res.send(data);
-    }
-  );
 };
 
-// Delete a Placd with the specified placeId in the request
-exports.delete = (req, res) => {
-  Place.remove(req.params.placeId, (err, data) => {
-    if (err) {
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found Place with id ${req.params.placeId}.`
+// Find a single place with an id
+exports.findOne = (req, res) => {
+  const id = req.params.id;
+
+  Place.findByPk(id)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error retrieving Place with id=" + id
+      });
+    });
+};
+
+// Update a Place by the id in the request
+exports.update = (req, res) => {
+  const id = req.params.id;
+
+  Place.update(req.body, {
+    where: { id: id }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "Place was updated successfully."
         });
       } else {
-        res.status(500).send({
-          message: "Could not delete Place with id " + req.params.placeId
+        res.send({
+          message: `Cannot update Place with id=${id}. Maybe Place was not found or req.body is empty!`
         });
       }
-    } else res.send({ message: `Place was deleted successfully!` });
-  });
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error updating Place with id=" + id
+      });
+    });
 };
 
-// Delete all Places from the database.
+// Delete a Place with the specified id in the request
+exports.delete = (req, res) => {
+  const id = req.params.id;
+
+  Place.destroy({
+    where: { id: id }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "Place was deleted successfully!"
+        });
+      } else {
+        res.send({
+          message: `Cannot delete Place with id=${id}. Maybe Place was not found!`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Could not delete Place with id=" + id
+      });
+    });
+};
+
+// Delete all Place from the database.
 exports.deleteAll = (req, res) => {
-  Place.removeAll((err, data) => {
-    if (err)
+  Place.destroy({
+    where: {},
+    truncate: false
+  })
+    .then(nums => {
+      res.send({ message: `${nums} Places were deleted successfully!` });
+    })
+    .catch(err => {
       res.status(500).send({
         message:
-          err.message || "Some error occurred while removing all places."
+          err.message || "Some error occurred while removing all Places."
       });
-    else res.send({ message: `All Places were deleted successfully!` });
-  });
+    });
 };
