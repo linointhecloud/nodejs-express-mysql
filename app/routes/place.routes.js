@@ -1,21 +1,25 @@
 module.exports = app => {
   const places = require("../controllers/place.controller.js")
 
+  var router = require("express").Router();
+
   // Create a new Place
-  app.post("/places", places.create);
+  router.post("/", places.create);
 
   // Retrieve all places
-  app.get("/places", places.findAll);
+  router.get("/", places.findAll);
 
   // Retrieve a single Place with placeId
-  app.get("/places/:placeId", places.findOne);
+  router.get("/:id", places.findOne);
 
   // Update a Places with placeId
-  app.put("/places/:placeId", places.update);
+  router.put("/:id", places.update);
 
   // Delete a Places with placeId
-  app.delete("/places/:placeId", places.delete);
+  router.delete("/:id", places.delete);
 
   // Delete all Places
-  app.delete("/places", places.deleteAll);
+  router.delete("/", places.deleteAll);
+
+  app.use('/api/places', router);
 }

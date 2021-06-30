@@ -3,14 +3,14 @@ const dotenv = require('dotenv').config('./');
 
 const dbConfig = require("../config/db.config.js");
 const connection = mysql.createConnection({
-  host: process.env.HOST,
+  /*host: process.env.HOST,
   user: process.env.DBUSER,
   password: process.env.DBPASSWORD,
-  database: process.env.DBNAME
-  /*host: dbConfig.HOST,
+  database: process.env.DBNAME*/
+  host: dbConfig.HOST,
   user: dbConfig.DBUSER,
   password: dbConfig.DBPASSWORD,
-  database: dbConfig.DBNAME*/
+  database: dbConfig.DBNAME
 })
 
 // open the MySQL connection
@@ -19,4 +19,4 @@ connection.connect(error => {
   console.log("Successfully connect to the database");
 });
 
-module.exports = connection;
+// module.exports = connection;
