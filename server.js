@@ -1,6 +1,4 @@
 const express = require("express")
-const bodyParser = require("body-parser")
-
 const app = express()
 
 // parse requests of content-type: application/json
@@ -16,6 +14,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to cloudcatwannabe application"})
 })
 
+require("./app/routes/place.routes.js")(app)
 require("./app/routes/customer.routes.js")(app)
 
 // set port, listen for requests
