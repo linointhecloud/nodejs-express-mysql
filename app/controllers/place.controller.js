@@ -20,12 +20,37 @@ exports.init = (req, res) => {
 			},
 			// IPadPro
 			{
-				name: "Photo #2 of Place #2",
+				name: "Photo #2 of Place #1",
 				url: "https://picsum.photos/400/300"
 			}
 		]
-	}, {
+	},
+   {
 		include: [ Photo ]
+  }).then(() => {		
+	
+		Place.create({ 
+      name: 'Place #2', 
+      description: 'Description on Place #2', 
+      longitude: "-12.082877831178896",
+      latitude: "-77.08259557680066",
+      photos: [
+        // IPhone 7 
+        {
+          name: "Photo #1 of Place #2",
+          url: "https://picsum.photos/400/300"
+        },
+        // IPadPro
+        {
+          name: "Photo #2 of Place #2",
+          url: "https://picsum.photos/400/300"
+        }
+      ]
+    }, {
+			include: [ Photo ]
+		}).then(() => {		
+			console.log("-----------> Samsung is created");
+		})
 	}).then(() => {
 		res.send("Done!");
 	})
